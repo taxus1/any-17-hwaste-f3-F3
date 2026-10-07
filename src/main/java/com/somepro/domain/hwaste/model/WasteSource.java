@@ -18,6 +18,9 @@ public class WasteSource {
 
     private String name;
 
+    /** 所在省份，联单跨省转移判定用。 */
+    private String province;
+
     private SourceStatus status;
 
     /** 只有正常（ACTIVE）的单位才允许登记入库。 */

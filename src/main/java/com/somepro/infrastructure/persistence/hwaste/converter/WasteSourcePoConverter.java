@@ -17,6 +17,7 @@ public final class WasteSourcePoConverter {
         domain.setId(po.getId());
         domain.setSourceNo(po.getSourceNo());
         domain.setName(po.getName());
+        domain.setProvince(po.getProvince());
         domain.setStatus(po.getStatus() == null ? null : SourceStatus.valueOf(po.getStatus()));
         return domain;
     }

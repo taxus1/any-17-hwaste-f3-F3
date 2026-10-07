@@ -23,6 +23,9 @@ public interface TransferPlanRepository {
 
     Mono<TransferPlan> findByPlanNo(String planNo);
 
+    /** 按单位 + 类别 + 年度查已批复（APPROVED）的计划；没有已批复的返回空。 */
+    Mono<TransferPlan> findApproved(Long sourceId, String categoryCode, Integer planYear);
+
     /** 草稿 / 驳回改量：只在 DRAFT / REJECTED 上生效，状态已变则更新 0 行。 */
     Mono<TransferPlan> updateDraft(TransferPlan plan);
 
