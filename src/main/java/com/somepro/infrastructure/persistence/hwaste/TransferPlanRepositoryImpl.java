@@ -74,6 +74,17 @@ public class TransferPlanRepositoryImpl extends BaseBlockingRepository implement
     }
 
     @Override
+    public Mono<TransferPlan> findBySourceCategoryYear(Long sourceId, String categoryCode, Integer planYear) {
+        return blocking(() -> {
+            TransferPlanPO po = transferPlanMapper.selectOne(Wrappers.<TransferPlanPO>lambdaQuery()
+                    .eq(TransferPlanPO::getSourceId, sourceId)
+                    .eq(TransferPlanPO::getCategoryCode, categoryCode)
+                    .eq(TransferPlanPO::getPlanYear, planYear));
+            return po == null ? null : TransferPlanPoConverter.toDomain(po);
+        });
+    }
+
+    @Override
     public Mono<TransferPlan> updateDraft(TransferPlan plan) {
         // 只改申报量，且只有草稿 / 首轮驳回能改；条件更新兜底并发
         return blocking(() -> {

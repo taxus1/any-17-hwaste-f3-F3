@@ -23,6 +23,9 @@ public interface TransferPlanRepository {
 
     Mono<TransferPlan> findByPlanNo(String planNo);
 
+    /** 按「单位 + 类别 + 年度」查计划（开联单时找对得上的那份计划）；不存在返回空。 */
+    Mono<TransferPlan> findBySourceCategoryYear(Long sourceId, String categoryCode, Integer planYear);
+
     /** 草稿 / 驳回改量：只在 DRAFT / REJECTED 上生效，状态已变则更新 0 行。 */
     Mono<TransferPlan> updateDraft(TransferPlan plan);
 

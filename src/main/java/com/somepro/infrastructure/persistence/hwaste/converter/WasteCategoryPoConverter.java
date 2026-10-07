@@ -17,6 +17,7 @@ public final class WasteCategoryPoConverter {
         domain.setId(po.getId());
         domain.setCategoryCode(po.getCategoryCode());
         domain.setName(po.getName());
+        domain.setCrossProvince(po.getCrossProvince());
         domain.setStatus(po.getStatus() == null ? null : CategoryStatus.valueOf(po.getStatus()));
         return domain;
     }

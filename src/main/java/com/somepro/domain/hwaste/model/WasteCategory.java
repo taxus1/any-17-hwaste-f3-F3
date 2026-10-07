@@ -18,10 +18,18 @@ public class WasteCategory {
 
     private String name;
 
+    /** 是否限制跨省转移：1 限制（不得跨省）/ 0 允许。 */
+    private Integer crossProvince;
+
     private CategoryStatus status;
 
     /** 只有启用（ENABLED）的类别才允许登记入库。 */
     public boolean isEnabled() {
         return this.status == CategoryStatus.ENABLED;
+    }
+
+    /** 名录上标了不许跨省的类别，供废与收货两头不在同一个省时联单开不出去。 */
+    public boolean isCrossProvinceRestricted() {
+        return this.crossProvince != null && this.crossProvince == 1;
     }
 }

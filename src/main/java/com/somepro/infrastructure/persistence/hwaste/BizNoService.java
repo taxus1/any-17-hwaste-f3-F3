@@ -9,12 +9,12 @@ import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Supplier;
 
 /**
- * 业务编号分配器（基础设施层）：CK（盘点单）/ AJ（调账流水）/ WB（入库批次）/ TP（年度转移计划），
- * 形如 CK-2026-0001，按「前缀-年份-四位序号」递增，全局唯一。
+ * 业务编号分配器（基础设施层）：CK（盘点单）/ AJ（调账流水）/ WB（入库批次）/ TP（年度转移计划）/
+ * EM（电子转移联单），形如 CK-2026-0001，按「前缀-年份-四位序号」递增，全局唯一。
  *
  * 并发约定：编号「取号 + 落库」必须包在同一把 JVM 锁里（见各仓储适配器的 inLock 用法），
- * 否则两个线程会拿到同一个号；库表唯一约束（uk_check_no / uk_adjust_no / uk_batch_no / uk_plan_no）是最后兜底。
- * 取号 SQL 用 FOR UPDATE 读当前已提交的最大号，避免事务快照读到旧值。
+ * 否则两个线程会拿到同一个号；库表唯一约束（uk_check_no / uk_adjust_no / uk_batch_no / uk_plan_no /
+ * uk_manifest_no）是最后兜底。取号 SQL 用 FOR UPDATE 读当前已提交的最大号，避免事务快照读到旧值。
  */
 @Component
 public class BizNoService {
@@ -26,13 +26,16 @@ public class BizNoService {
     private final StockAdjustMapper stockAdjustMapper;
     private final WasteStockMapper wasteStockMapper;
     private final TransferPlanMapper transferPlanMapper;
+    private final TransferManifestMapper transferManifestMapper;
 
     public BizNoService(StockCheckMapper stockCheckMapper, StockAdjustMapper stockAdjustMapper,
-                        WasteStockMapper wasteStockMapper, TransferPlanMapper transferPlanMapper) {
+                        WasteStockMapper wasteStockMapper, TransferPlanMapper transferPlanMapper,
+                        TransferManifestMapper transferManifestMapper) {
         this.stockCheckMapper = stockCheckMapper;
         this.stockAdjustMapper = stockAdjustMapper;
         this.wasteStockMapper = wasteStockMapper;
         this.transferPlanMapper = transferPlanMapper;
+        this.transferManifestMapper = transferManifestMapper;
     }
 
     /** 在指定前缀的锁里执行一段「取号 + 落库」临界区。 */
@@ -72,6 +75,12 @@ public class BizNoService {
     public String nextPlanNo(int year) {
         String prefix = "TP-" + year + "-";
         return next(prefix, transferPlanMapper.maxPlanNo(prefix));
+    }
+
+    /** 下一个联单编号，形如 EM-2026-0001，年份取提交当下的自然年。 */
+    public String nextManifestNo() {
+        String prefix = yearPrefix("EM");
+        return next(prefix, transferManifestMapper.maxManifestNo(prefix));
     }
 
     private String yearPrefix(String bizPrefix) {
